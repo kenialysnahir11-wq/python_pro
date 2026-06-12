@@ -1,0 +1,151 @@
+from discord.ext import commands
+import discord
+import random
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(command_prefix="$", intents=intents)
+
+# -------------------------
+# BOT LISTO
+# -------------------------
+
+@bot.event
+async def on_ready():
+    print(f"EcoBot PR está activo como {bot.user}")
+
+# -------------------------
+# CONSEJOS ECOLÓGICOS
+# -------------------------
+
+eco_tips = [
+    "Usa botellas reutilizables en vez de plástico.",
+    "No tires basura en las playas de Puerto Rico.",
+    "Apaga las luces cuando no las uses.",
+    "Reduce el uso de plástico de un solo uso.",
+    "Cuida el agua, es un recurso limitado."
+]
+
+@bot.command()
+async def eco_tip(ctx):
+    await ctx.send(random.choice(eco_tips))
+
+# -------------------------
+# DATOS DE PUERTO RICO
+# -------------------------
+
+@bot.command()
+async def dato_pr(ctx):
+
+    datos = [
+        "Las playas de Puerto Rico son importantes para el turismo y la naturaleza.",
+        "El sargazo afecta algunas costas de la isla.",
+        "Las tortugas marinas visitan las playas para anidar.",
+        "El reciclaje depende del municipio en Puerto Rico."
+    ]
+
+    await ctx.send(random.choice(datos))
+
+# -------------------------
+# RECICLAJE SIMPLE
+# -------------------------
+
+@bot.command()
+async def reciclar(ctx, *, objeto):
+
+    objeto = objeto.lower()
+
+    if objeto in ["botella", "plastico", "plástico"]:
+        await ctx.send("Va al reciclaje de plástico si está disponible en tu área.")
+
+    elif objeto in ["papel", "carton", "cartón"]:
+        await ctx.send("Va al reciclaje de papel.")
+
+    elif objeto in ["vidrio"]:
+        await ctx.send("Va al reciclaje de vidrio.")
+
+    elif objeto in ["lata", "aluminio"]:
+        await ctx.send("Va al reciclaje de metal.")
+
+    else:
+        await ctx.send("No tengo información sobre ese objeto en Puerto Rico.")
+
+# -------------------------
+# DESCOMPOSICIÓN
+# -------------------------
+
+@bot.command()
+async def descomponer(ctx, *, objeto):
+
+    info = {
+        "plastico": "El plástico puede tardar cientos de años en descomponerse.",
+        "vidrio": "El vidrio puede tardar miles de años.",
+        "lata": "Las latas tardan décadas en descomponerse.",
+        "papel": "El papel tarda semanas o meses."
+    }
+
+    await ctx.send(info.get(objeto.lower(), "No hay información disponible."))
+
+# -------------------------
+# MINI JUEGO: DADO
+# -------------------------
+
+@bot.command()
+async def dado(ctx):
+    numero = random.randint(1, 6)
+    await ctx.send(f"Salió el número {numero}")
+
+# -------------------------
+# MINI TRIVIA
+# -------------------------
+
+@bot.command()
+async def ecoquiz(ctx):
+
+    preguntas = {
+        "¿Qué debes hacer en la playa para cuidar el ambiente?": "no basura",
+        "¿Qué ayuda más al planeta?": "reciclar",
+        "¿Dónde viven las tortugas en Puerto Rico?": "playas"
+    }
+
+    pregunta = random.choice(list(preguntas.keys()))
+
+    await ctx.send(pregunta)
+
+    def check(m):
+        return m.author == ctx.author and m.channel == ctx.channel
+
+    try:
+        respuesta = await bot.wait_for("message", timeout=15, check=check)
+
+        if respuesta.content.lower() == preguntas[pregunta]:
+            await ctx.send("Correcto, buen trabajo.")
+        else:
+            await ctx.send(f"Incorrecto. La respuesta correcta es: {preguntas[pregunta]}")
+
+    except:
+        await ctx.send("Tiempo agotado.")
+
+# -------------------------
+# AYUDA
+# -------------------------
+
+@bot.command()
+async def ayuda(ctx):
+    await ctx.send("""
+Comandos del EcoBot PR:
+
+$eco_tip - consejo ecológico
+$dato_pr - información de Puerto Rico
+$reciclar objeto - cómo reciclar
+$descomponer objeto - tiempo de descomposición
+$dado - juego de dado
+$ecoquiz - trivia
+$ayuda - comandos
+""")
+
+# -------------------------
+# EJECUTAR BOT
+# -------------------------
+
